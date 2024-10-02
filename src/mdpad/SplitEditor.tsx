@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Box } from "@chakra-ui/react";
 import Editor from "@monaco-editor/react";
 import { editor } from "monaco-editor/esm/vs/editor/editor.api";
@@ -6,7 +7,6 @@ import Preview from "./components/Preview";
 import Score from "./components/Score";
 import Mermaid from "./components/Mermaid";
 import Echarts from "./components/Echarts";
-
 type EditorProps = {
   language: string;
   mdString: string;
@@ -16,101 +16,69 @@ type EditorProps = {
   wikiBase: string;
   tagBase: string;
 };
-
-export default function SplitEditor(props: EditorProps) {
-  const {language, mdString, darkMode, setText, setEditor, wikiBase, tagBase} = props;
-
-  return (
-    <>
-      {["markdown", "abcjs", "mermaid", "echarts"].includes(language) ? (
-        <Box flex={1} minH={0} h="100%" >
+export default memo(function SplitEditor(props: EditorProps) {
+  const {
+    language,
+    mdString,
+    darkMode,
+    setText,
+    setEditor,
+    wikiBase,
+    tagBase
+  } = props;
+  return <>
+      {["markdown", "abcjs", "mermaid", "echarts"].includes(language) ? <Box flex={1} minH={0} h="100%">
           <Split className="split" minSize={50}>
             <Box>
-              <Editor
-                theme={darkMode ? "vs-dark" : "vs"}
-                language={language}
-                options={{
-                  automaticLayout: true,
-                  fontSize: 14,
-                  wordWrap: "on",
-                }}
-                onMount={(editor) => setEditor(editor)}
-                onChange={(text) => {
-                  if (text !== undefined) {
-                    setText(text);
-                  }
-                }}
-              />
+              <Editor theme={darkMode ? "vs-dark" : "vs"} language={language} options={{
+            automaticLayout: true,
+            fontSize: 14,
+            wordWrap: "on"
+          }} onMount={editor => setEditor(editor)} onChange={text => {
+            if (text !== undefined) {
+              setText(text);
+            }
+          }} />
             </Box>
             <Box overflow="auto">
-              {language === "markdown" ? (
-                <Preview 
-                  text={mdString} 
-                  darkMode={darkMode} 
-                  wikiBase={wikiBase} 
-                  tagBase={tagBase} 
-                />
-              ) : language === "abcjs" ? (
-                <Score notes={mdString} darkMode={darkMode} />
-              ) : language === "echarts" ? (
-                <Echarts key={mdString.length} text={mdString} darkMode={darkMode} />
-              ) : (
-                <Mermaid key={mdString.length} text={mdString} darkMode={darkMode} />
-              )}
+              {language === "markdown" ? <Preview text={mdString} darkMode={darkMode} wikiBase={wikiBase} tagBase={tagBase} /> : language === "abcjs" ? <Score notes={mdString} darkMode={darkMode} /> : language === "echarts" ? <Echarts key={mdString.length} text={mdString} darkMode={darkMode} /> : <Mermaid key={mdString.length} text={mdString} darkMode={darkMode} />}
             </Box>
           </Split>
-        </Box>
-      ) : (
-        <Box flex={1} minH={0}>
-          <Editor
-            theme={darkMode ? "vs-dark" : "vs"}
-            language={language}
-            options={{
-              automaticLayout: true,
-              fontSize: 14,
-              wordWrap: "on",
-            }}
-            onMount={(editor) => setEditor(editor)}
-          />
-        </Box>
-      )}
-    </> 
-  );
-}
-
-export function MdEditor(props: EditorProps) {
-  const {language, mdString, darkMode, setText, setEditor, wikiBase, tagBase} = props;
-
-  return (
-    <Box flex={1} minH={0} h="100%" >
+        </Box> : <Box flex={1} minH={0}>
+          <Editor theme={darkMode ? "vs-dark" : "vs"} language={language} options={{
+        automaticLayout: true,
+        fontSize: 14,
+        wordWrap: "on"
+      }} onMount={editor => setEditor(editor)} />
+        </Box>}
+    </>;
+});
+export const MdEditor = memo(function MdEditor(props: EditorProps) {
+  const {
+    language,
+    mdString,
+    darkMode,
+    setText,
+    setEditor,
+    wikiBase,
+    tagBase
+  } = props;
+  return <Box flex={1} minH={0} h="100%">
       <Split className="split" minSize={50}>
         <Box>
-          <Editor
-            theme={darkMode ? "vs-dark" : "vs"}
-            language={language}
-            options={{
-              automaticLayout: true,
-              fontSize: 14,
-              wordWrap: "on",
-            }}
-            onMount={(editor) => setEditor(editor)}
-            onChange={(text) => {
-              if (text !== undefined) {
-                setText(text);
-              }
-            }}
-          />
+          <Editor theme={darkMode ? "vs-dark" : "vs"} language={language} options={{
+          automaticLayout: true,
+          fontSize: 14,
+          wordWrap: "on"
+        }} onMount={editor => setEditor(editor)} onChange={text => {
+          if (text !== undefined) {
+            setText(text);
+          }
+        }} />
         </Box>
         <Box overflow="auto">
-          <Preview 
-            key={mdString.length} 
-            text={mdString} 
-            darkMode={darkMode} 
-            wikiBase={wikiBase} 
-            tagBase={tagBase}
-          />
+          <Preview key={mdString.length} text={mdString} darkMode={darkMode} wikiBase={wikiBase} tagBase={tagBase} />
         </Box>
       </Split>
-    </Box>
-  );
-}
+    </Box>;
+});

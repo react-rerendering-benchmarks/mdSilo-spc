@@ -1,11 +1,10 @@
+import { useRef } from "react";
+import { memo } from "react";
 import { useEffect, useState } from "react";
-import { 
-  Box, Button, Flex, HStack, Input, Radio, RadioGroup, Stack, Text, Tooltip 
-} from "@chakra-ui/react";
+import { Box, Button, Flex, HStack, Input, Radio, RadioGroup, Stack, Text, Tooltip } from "@chakra-ui/react";
 import { TbHeadphones, TbPlus, TbRss, TbTrash } from "react-icons/tb";
 import { ChannelType } from "./types";
 import * as dataAgent from "../dataAgent";
-
 type Props = {
   channelList: ChannelType[];
   handleAddFeed: (url: string, ty: string, title: string) => Promise<void>;
@@ -13,90 +12,71 @@ type Props = {
   handleImport?: () => void;
   handleExport?: () => void;
 };
-
-export function FeedManager(props: Props) {
-  const { channelList, handleAddFeed, handleDelete } = props;
-
+export const FeedManager = memo(function FeedManager(props: Props) {
+  const {
+    channelList,
+    handleAddFeed,
+    handleDelete
+  } = props;
   const [realList, setRealList] = useState<ChannelType[]>(channelList);
   const [showAdd, setShowAdd] = useState(false);
-  const [searchText, setSearchText] = useState<string>("");
-
-  const [feedUrl, setFeedUrl] = useState("https://www.propublica.org/feeds/propublica/main");
+  const searchText = useRef<string>("");
+  const feedUrl = useRef("https://www.propublica.org/feeds/propublica/main");
   const [feedType, setFeedType] = useState("rss");
-  const [feedTitle, setFeedTitle] = useState("");
+  const feedTitle = useRef("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [confirming, setConfirming] = useState(false);
-
   useEffect(() => {
-   setRealList(channelList);
+    setRealList(channelList);
   }, [channelList]);
-
   const handleLoad = async () => {
     setLoading(true);
-    const res = await dataAgent.fetchFeed(feedUrl);
+    const res = await dataAgent.fetchFeed(feedUrl.current.value);
     // console.log("res from rust", res);
     if (!res) {
       setDescription('Cant find any feed, please check url');
       return;
     }
-    const { channel } = res;
-    setFeedTitle(channel.title);
+    const {
+      channel
+    } = res;
+    feedTitle.current.value = channel.title;
     setDescription(channel.intro || '');
     setLoading(false);
   };
-
   const handleCancel = () => {
     setLoading(false);
     setConfirming(false);
-    setFeedTitle("");
-    setFeedUrl("");
+    feedTitle.current.value = "";
+    feedUrl.current.value = "";
     setDescription("");
     setShowAdd(false);
   };
-
   const handleSave = async () => {
-    await handleAddFeed(feedUrl, feedType, feedTitle);
+    await handleAddFeed(feedUrl.current.value, feedType, feedTitle.current.value);
     setConfirming(false);
     setShowAdd(false);
   };
-
   const handleSearch = (txt: string) => {
     if (txt) {
-      const result = channelList.filter((item) => {
-        return item.title.indexOf(txt) > -1 || item.link.indexOf(txt) > -1
-      })
+      const result = channelList.filter(item => {
+        return item.title.indexOf(txt) > -1 || item.link.indexOf(txt) > -1;
+      });
       setRealList(result);
     } else {
       setRealList(channelList);
     }
   };
-
-  return (
-    <Flex direction="column" p={2} w="100%" className="items-start justify-center">
-      {showAdd && (
-        <Flex direction="column" className="w-full">
+  return <Flex direction="column" p={2} w="100%" className="items-start justify-center">
+      {showAdd && <Flex direction="column" className="w-full">
           <HStack m={2}>
             <Text mr={2} textColor={""}>URL</Text>
-            <Input
-              type="text" 
-              mx={2}
-              placeholder="Feed URL"
-              value={feedUrl}
-              onChange={(e) => setFeedUrl(e.target.value)}
-              autoFocus
-            />
+            <Input type="text" mx={2} placeholder="Feed URL" ref={feedUrl} autoFocus />
           </HStack>
           <HStack m={2}>
             <Text mr={2} textColor={""}>Title</Text>
-            <Input
-              type="text"
-              mx={2}
-              placeholder="Feed Title"
-              value={feedTitle}
-              onChange={(e) => setFeedTitle(e.target.value)}
-              autoFocus
-            />
+            <Input type="text" mx={2} placeholder="Feed Title" ref={feedTitle} autoFocus />
           </HStack>
           <HStack m={2}>
             <Text mr={2} textColor={""}>Type</Text>
@@ -114,55 +94,35 @@ export function FeedManager(props: Props) {
             <Button mx={3} onClick={handleCancel}>Cancel</Button>
             <Button mx={3} onClick={handleSave}>{confirming ? 'Saving..' : 'OK'}</Button>
           </HStack>
-        </Flex>
-      )}
+        </Flex>}
       <Flex direction="row" justifyContent="between" w="full" m={2} className="items-center">
         <Tooltip label="Add Feed" placement="bottom">
-          <button
-            className="px-2 py-1 text-sm text-black rounded bg-primary-200 hover:bg-primary-100"
-            onClick={() => setShowAdd(!showAdd)}
-          >
+          <button className="px-2 py-1 text-sm text-black rounded bg-primary-200 hover:bg-primary-100" onClick={() => setShowAdd(!showAdd)}>
             <TbPlus size={15} className="" />
           </button>
         </Tooltip>
         <Box ml={4} className="">
-          <input
-            type="text"
-            className="p-2 m-2 bg-white border-gray-200 rounded dark:bg-gray-700 dark:border-gray-700"
-            placeholder="Search Feed"
-            value={searchText}
-            onChange={(e) => {
-              setSearchText(e.target.value);
-              handleSearch(e.target.value);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                handleSearch(searchText);
-              }
-            }}
-          />
+          <input type="text" className="p-2 m-2 bg-white border-gray-200 rounded dark:bg-gray-700 dark:border-gray-700" placeholder="Search Feed" ref={searchText} onKeyDown={e => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            handleSearch(searchText.current.value);
+          }
+        }} />
         </Box>
       </Flex>
       <Flex direction="column" className="w-full">
         {realList.map((channel: ChannelType, idx: number) => {
-          return (
-            <HStack key={idx} m={1}>
-              {channel.ty === 'podcast' 
-                ? <TbHeadphones size={12}  color="purple" /> 
-                : <TbRss size={12} color="orange" />
-              }
+        return <HStack key={idx} m={1}>
+              {channel.ty === 'podcast' ? <TbHeadphones size={12} color="purple" /> : <TbRss size={12} color="orange" />}
               <Text className="text-sm dark:text-white">{channel.title}</Text>
               <Text className="text-sm dark:text-white">{channel.link}</Text>
               <button onClick={async () => await handleDelete(channel)}>
                 <TbTrash size={18} className="m-1 dark:text-white" />
               </button>
-            </HStack>
-          )
-        })}
+            </HStack>;
+      })}
       </Flex>
-    </Flex>
-  );
-}
+    </Flex>;
+});
 
 // TODO: import/export OPML, EDIT FEED

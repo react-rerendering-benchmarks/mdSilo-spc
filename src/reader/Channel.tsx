@@ -4,7 +4,6 @@ import { TbRefresh } from "react-icons/tb";
 import { fmtDatetime } from '../utils';
 import { ArticleType, ChannelType } from "./types";
 import * as dataAgent from '../dataAgent';
-
 type Props = {
   channel: ChannelType | null;
   starChannel?: boolean;
@@ -15,113 +14,88 @@ type Props = {
   loading: boolean;
   syncing: boolean;
 };
-
-export function Channel(props: Props) {
-  const { 
-    channel, starChannel, articles, handleRefresh, onClickArticle, loading, syncing 
+export const Channel = memo(function Channel(props: Props) {
+  const {
+    channel,
+    starChannel,
+    articles,
+    handleRefresh,
+    onClickArticle,
+    loading,
+    syncing
   } = props;
-
   if (loading) {
-    return (<Spinner />);
+    return <Spinner />;
   } else if (!articles) {
-    return (<></>);
+    return <></>;
   }
-
-  return (
-    <Flex direction="column" p={2} className="items-between justify-center">
+  return <Flex direction="column" p={2} className="items-between justify-center">
       <HStack p={2} className="bg-slate-500 rounded">
         <Text as="b" fontSize="xl">
           {channel?.title || (starChannel ? 'Starred' : 'Playlist')}
         </Text>
-        {(channel) && (
-          <Tooltip label="Refresh Channel" placement="bottom">
+        {channel && <Tooltip label="Refresh Channel" placement="bottom">
             <button className="" onClick={handleRefresh}>
               <TbRefresh size={18} className="m-1 dark:text-white" />
             </button>
-          </Tooltip>
-        )}
+          </Tooltip>}
       </HStack>
       {syncing && <Spinner boxSize={6} />}
-      <ArticleList
-        articles={articles}
-        onClickArticle={onClickArticle}
-      />
-    </Flex>
-  );
-}
-
+      <ArticleList articles={articles} onClickArticle={onClickArticle} />
+    </Flex>;
+});
 type ListProps = {
   articles: ArticleType[];
   onClickArticle: (article: ArticleType) => Promise<void>;
 };
-
 function ArticleList(props: ListProps) {
-  const { articles, onClickArticle } = props;
+  const {
+    articles,
+    onClickArticle
+  } = props;
   const [highlighted, setHighlighted] = useState<ArticleType>();
-
   const onArticleSelect = async (article: ArticleType) => {
     setHighlighted(article);
     await onClickArticle(article);
   };
-
-  const sortedArticles = articles.length >= 2 
-    ? articles.sort((n1, n2) => {
-        return (n2.published || 0) - (n1.published || 0);
-      })
-    : articles;
-
-  return (
-    <Box className="">
+  const sortedArticles = articles.length >= 2 ? articles.sort((n1, n2) => {
+    return (n2.published || 0) - (n1.published || 0);
+  }) : articles;
+  return <Box className="">
       {sortedArticles.map((article: ArticleType, idx: number) => {
-        return (
-          <ArticleItem
-            key={`${article.id}-${idx}`}
-            article={article}
-            highlight={highlighted?.id === article.id}
-            onArticleSelect={onArticleSelect}
-          />
-        )}
-      )}
-    </Box>
-  );
+      return <ArticleItem key={`${article.id}-${idx}`} article={article} highlight={highlighted?.id === article.id} onArticleSelect={onArticleSelect} />;
+    })}
+    </Box>;
 }
-
 type ItemProps = {
   article: ArticleType;
   onArticleSelect: (article: ArticleType) => Promise<void>;
   highlight: boolean;
 };
-
 const ArticleItem = memo(function ArticleItm(props: ItemProps) {
-  const { article, onArticleSelect, highlight } = props;
+  const {
+    article,
+    onArticleSelect,
+    highlight
+  } = props;
   const [readStatus, setReadStatus] = useState(false);
-
   const handleClick = async () => {
     if (onArticleSelect) {
       await onArticleSelect(article);
       setReadStatus(true);
     }
   };
-
-  useEffect(() => { 
+  useEffect(() => {
     dataAgent.checkArticleReadStatus(article.feed_url).then(res => {
       setReadStatus(res);
-    })
-  }, [])
-
-  return (
-    <Flex
-      direction="column"
-      cursor="pointer"
-      my={1}
-      bgColor={highlight ? 'blue.200' : `${readStatus ? '' : 'blue.100'}`}
-      _hover={{bgColor: "gray.200"}}
-      onClick={handleClick}
-    >
+    });
+  }, []);
+  return <Flex direction="column" cursor="pointer" my={1} bgColor={highlight ? 'blue.200' : `${readStatus ? '' : 'blue.100'}`} _hover={{
+    bgColor: "gray.200"
+  }} onClick={handleClick}>
       <Text as="b" m={1} className="font-bold dark:text-white">{article.title}</Text>
       <Text as="i" fontSize="sm" m={1} className="dark:text-slate-400">
         {fmtDatetime(article.published || '')}
       </Text>
-    </Flex>
-  );
+    </Flex>;
 });
