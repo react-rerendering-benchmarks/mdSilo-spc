@@ -1,12 +1,8 @@
-import {
-  Button, ButtonGroup, HStack, Icon, Input, Menu, MenuButton, MenuList, 
-  Popover, PopoverArrow, PopoverBody, PopoverCloseButton, PopoverContent, 
-  PopoverFooter, PopoverHeader, PopoverTrigger, Text, useDisclosure,
-} from "@chakra-ui/react";
+import { memo } from "react";
+import { Button, ButtonGroup, HStack, Icon, Input, Menu, MenuButton, MenuList, Popover, PopoverArrow, PopoverBody, PopoverCloseButton, PopoverContent, PopoverFooter, PopoverHeader, PopoverTrigger, Text, useDisclosure } from "@chakra-ui/react";
 import { useRef, useState } from "react";
 import { VscEllipsis, VscMarkdown } from "react-icons/vsc";
 import { SimpleNote } from "./types";
-
 type Props = {
   note: SimpleNote;
   onOpenNote: (id: string) => void;
@@ -16,22 +12,18 @@ type Props = {
   darkMode: boolean;
   isActive: boolean;
 };
-
-export default function NoteItem({
+export default memo(function NoteItem({
   note,
   onOpenNote,
   onRename,
   onMoveNote,
   onDelNote,
   darkMode,
-  isActive,
+  isActive
 }: Props) {
-  return (
-    <HStack 
-      justifyContent="space-between" my={1} px={2}  
-      _hover={{bgColor: darkMode ? "#464647" : "gray.200"}}
-      bgColor={isActive ? (darkMode ? "#464647" : "gray.300") : ""}
-    >
+  return <HStack justifyContent="space-between" my={1} px={2} _hover={{
+    bgColor: darkMode ? "#464647" : "gray.200"
+  }} bgColor={isActive ? darkMode ? "#464647" : "gray.300" : ""}>
       <HStack rounded="md" cursor="pointer">
         <Icon as={VscMarkdown} size={8} />
         <Text fontWeight="medium" onClick={() => onOpenNote(note.id)}>
@@ -46,61 +38,43 @@ export default function NoteItem({
           <DelNote note={note} onDelete={onDelNote} darkMode={darkMode} />
         </MenuList>
       </Menu>
-    </HStack>
-  );
-}
-
+    </HStack>;
+});
 type RenameProps = {
   note: any;
   onRename: (id: string, title: string) => void;
   darkMode: boolean;
 };
-
-function Rename({note, onRename, darkMode}: RenameProps) {
+function Rename({
+  note,
+  onRename,
+  darkMode
+}: RenameProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen,
+    onOpen,
+    onClose
+  } = useDisclosure();
   const [title, setTitle] = useState(note.title);
   function handleRenameNote() {
     onRename(note.id, title);
     onClose();
   }
-
-  return (
-    <Popover
-      placement="right"
-      isOpen={isOpen}
-      onClose={onClose}
-      initialFocusRef={inputRef}
-    >
+  return <Popover placement="right" isOpen={isOpen} onClose={onClose} initialFocusRef={inputRef}>
       <PopoverTrigger>
         <Button onClick={onOpen}>Rename Note</Button>
       </PopoverTrigger>
-      <PopoverContent
-        bgColor={darkMode ? "#333333" : "white"}
-        borderColor={darkMode ? "#464647" : "gray.200"}
-      >
-        <PopoverHeader
-          fontWeight="semibold"
-          borderColor={darkMode ? "#464647" : "gray.200"}
-        >
+      <PopoverContent bgColor={darkMode ? "#333333" : "white"} borderColor={darkMode ? "#464647" : "gray.200"}>
+        <PopoverHeader fontWeight="semibold" borderColor={darkMode ? "#464647" : "gray.200"}>
           Rename
         </PopoverHeader>
         <PopoverArrow bgColor={darkMode ? "#333333" : "white"} />
         <PopoverCloseButton />
         <PopoverBody borderColor={darkMode ? "#464647" : "gray.200"}>
-          <Input
-            ref={inputRef}
-            mb={2}
-            value={title}
-            maxLength={25}
-            onChange={(event) => setTitle(event.target.value)}
-          />
+          <Input ref={inputRef} mb={2} value={title} maxLength={25} onChange={event => setTitle(event.target.value)} />
         </PopoverBody>
-        <PopoverFooter
-          display="flex"
-          justifyContent="flex-end"
-          borderColor={darkMode ? "#464647" : "gray.200"}
-        >
+        <PopoverFooter display="flex" justifyContent="flex-end" borderColor={darkMode ? "#464647" : "gray.200"}>
           <ButtonGroup size="sm">
             <Button colorScheme="blue" onClick={handleRenameNote}>
               Rename
@@ -108,61 +82,43 @@ function Rename({note, onRename, darkMode}: RenameProps) {
           </ButtonGroup>
         </PopoverFooter>
       </PopoverContent>
-    </Popover>
-  );
+    </Popover>;
 }
-
 type MoveProps = {
   note: any;
   onMove: (id: string, title: string) => void;
   darkMode: boolean;
 };
-
-function MoveNote({note, onMove, darkMode}: MoveProps) {
+function MoveNote({
+  note,
+  onMove,
+  darkMode
+}: MoveProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen,
+    onOpen,
+    onClose
+  } = useDisclosure();
   const [folder, setFolder] = useState(note.folder);
   function handleMoveNote() {
     onMove(note.id, folder);
     onClose();
   }
-
-  return (
-    <Popover
-      placement="right"
-      isOpen={isOpen}
-      onClose={onClose}
-      initialFocusRef={inputRef}
-    >
+  return <Popover placement="right" isOpen={isOpen} onClose={onClose} initialFocusRef={inputRef}>
       <PopoverTrigger>
         <Button onClick={onOpen}>Move Note</Button>
       </PopoverTrigger>
-      <PopoverContent
-        bgColor={darkMode ? "#333333" : "white"}
-        borderColor={darkMode ? "#464647" : "gray.200"}
-      >
-        <PopoverHeader
-          fontWeight="semibold"
-          borderColor={darkMode ? "#464647" : "gray.200"}
-        >
+      <PopoverContent bgColor={darkMode ? "#333333" : "white"} borderColor={darkMode ? "#464647" : "gray.200"}>
+        <PopoverHeader fontWeight="semibold" borderColor={darkMode ? "#464647" : "gray.200"}>
           Rename
         </PopoverHeader>
         <PopoverArrow bgColor={darkMode ? "#333333" : "white"} />
         <PopoverCloseButton />
         <PopoverBody borderColor={darkMode ? "#464647" : "gray.200"}>
-          <Input
-            ref={inputRef}
-            mb={2}
-            value={folder}
-            maxLength={25}
-            onChange={(event) => setFolder(event.target.value)}
-          />
+          <Input ref={inputRef} mb={2} value={folder} maxLength={25} onChange={event => setFolder(event.target.value)} />
         </PopoverBody>
-        <PopoverFooter
-          display="flex"
-          justifyContent="flex-end"
-          borderColor={darkMode ? "#464647" : "gray.200"}
-        >
+        <PopoverFooter display="flex" justifyContent="flex-end" borderColor={darkMode ? "#464647" : "gray.200"}>
           <ButtonGroup size="sm">
             <Button colorScheme="blue" onClick={handleMoveNote}>
               Move
@@ -170,57 +126,43 @@ function MoveNote({note, onMove, darkMode}: MoveProps) {
           </ButtonGroup>
         </PopoverFooter>
       </PopoverContent>
-    </Popover>
-  );
+    </Popover>;
 }
-
 type DelProps = {
   note: any;
   onDelete: (id: string) => void;
   darkMode: boolean;
 };
-
-function DelNote({note, onDelete, darkMode}: DelProps) {
+function DelNote({
+  note,
+  onDelete,
+  darkMode
+}: DelProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen,
+    onOpen,
+    onClose
+  } = useDisclosure();
   function handleDelNote() {
     onDelete(note.id);
     onClose();
   }
-
-  return (
-    <Popover
-      placement="right"
-      isOpen={isOpen}
-      onClose={onClose}
-      initialFocusRef={inputRef}
-    >
+  return <Popover placement="right" isOpen={isOpen} onClose={onClose} initialFocusRef={inputRef}>
       <PopoverTrigger>
         <Button onClick={onOpen}>Delete Note</Button>
       </PopoverTrigger>
-      <PopoverContent
-        bgColor={darkMode ? "#333333" : "white"}
-        borderColor={darkMode ? "#464647" : "gray.200"}
-      >
-        <PopoverHeader
-          fontWeight="semibold"
-          borderColor={darkMode ? "#464647" : "gray.200"}
-        >
+      <PopoverContent bgColor={darkMode ? "#333333" : "white"} borderColor={darkMode ? "#464647" : "gray.200"}>
+        <PopoverHeader fontWeight="semibold" borderColor={darkMode ? "#464647" : "gray.200"}>
           Delete
         </PopoverHeader>
         <PopoverArrow bgColor={darkMode ? "#333333" : "white"} />
         <PopoverCloseButton />
         <PopoverBody borderColor={darkMode ? "#464647" : "gray.200"}>
-          <Button
-            size="sm"
-            w="100%"
-            colorScheme={darkMode ? "whiteAlpha" : "gray"}
-            onClick={handleDelNote}
-          >
+          <Button size="sm" w="100%" colorScheme={darkMode ? "whiteAlpha" : "gray"} onClick={handleDelNote}>
             Confirm Delete
           </Button>
         </PopoverBody>
       </PopoverContent>
-    </Popover>
-  );
+    </Popover>;
 }

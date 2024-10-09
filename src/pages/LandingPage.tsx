@@ -1,11 +1,7 @@
-
-function LandingPage() {
-  
-  return (
-    <div>
+import { memo } from "react";
+const LandingPage = memo(function LandingPage() {
+  return <div>
       Enter
-    </div>   
-  );
-}
-
+    </div>;
+});
 export default LandingPage;
